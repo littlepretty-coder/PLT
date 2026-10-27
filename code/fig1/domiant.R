@@ -4,20 +4,11 @@ library(vegan)
 library(ggplot2)
 library(ggrepel)
 library(dplyr)
-groups = read.delim("./data/metadata.txt", sep='\t')
-#groups = groups[(groups$Group == 'W/O Infection'),]
-#groups = groups[(groups$is20 == 0)&(groups$Group == 'W/O Infection'),]
-
-OTUs <- read.delim('./data/属水平绝对定量.txt',sep='\t',check.names = F)
-
 
 bacteria = OTUs[OTUs$Kingdom == 'Bacteria',]
 fungi = OTUs[OTUs$Kingdom == 'Eukaryota',]
 archaea = OTUs[OTUs$Kingdom == 'Archaea',]
-
-index = read.delim('./fig1/1C/fungi.diversity.index.txt',sep='\t')
 index = index[,c(1,2)]
-
 
 df = fungi
 df = df[,-c(1,3)]
@@ -26,7 +17,6 @@ colnames(df)[1] = 'Genus'
 rownames(df) = df$Genus
 df = df[,-1]
 df = df[,colnames(df)%in%groups$SampleID]
-# 定义函数，输入为丰度表
 find_dominant_genus <- function(abundance_table) {
   sample_names <- colnames(abundance_table)
   result_df <- data.frame(Sample = character(), Dominant_Genus = character(), stringsAsFactors = FALSE)
@@ -53,24 +43,23 @@ mycol=c("#A6CEE3", "#CCEBC5", "#FDBF6F", "#FFFF99", "#66c2A5", "#FDDAEC", "#BF5B
         "#BC80BD", "#FFED6F")
 
 
-
 ggplot(groups, aes(x = days, y = ID, color = Dominant_Genus.y)) +
   geom_point(size = 5, aes(fill = Dominant_Genus.y), stroke = 1.2) +
   #geom_text(aes(label = SampleID), vjust = -1, size = 3) +
-  scale_color_manual(values=mycol) +  # 设置颜色调色板
-  #scale_shape_manual(values = 1:50) +  # 设置形状
+  scale_color_manual(values=mycol) +  
+  #scale_shape_manual(values = 1:50) + 
   theme_minimal() +
   labs(x = "Days", y = "Patient", title = "Sample Overview by Patient, Days, and Main Taxa") +
   theme(panel.grid = element_blank())
 
 
 get_dominant_or_diversity <- function(category_column) {
-  freq_table <- table(category_column)  # 统计各类属的频率
-  dominant <- names(which.max(freq_table))  # 找出出现次数最多的属
+  freq_table <- table(category_column) 
+  dominant <- names(which.max(freq_table)) 
   if (max(freq_table) > length(category_column) / 2) {
-    return(dominant)  # 如果该属超过一半，返回该属
+    return(dominant) 
   } else {
-    return("diversity")  # 否则返回 "diversity"
+    return("diversity") 
   }
 }
 
@@ -82,15 +71,8 @@ result <- groups %>%
   ) %>%
   ungroup()
 table(result$fungi)
-# Aspergillus      Botrytis       Candida    Clavispora     diversity    Geosmithia    Malassezia  Nakaseomyces    Neurospora 
-# 3             1            16             3            59             3             1             3            17 
-# Pyricularia     Ramularia Saccharomyces  Trichosporon 
-# 1             2            11             9 
 
 
 dominant_genera_bac = dominant_genera_df
 dominant_genera_fungi = dominant_genera_df
-save(dominant_genera_bac,dominant_genera_fungi,file = './fig1/1D/domiant.RData')
-load('./fig1/1D/domiant.RData')
-write.table(dominant_genera_bac,'./figure/suppdata/fig1/sample_dominant_genera_bac.csv',sep=',',row.names = F)
-write.table(dominant_genera_fungi,'./figure/suppdata/fig1/sample_dominant_genera_fungi.csv',sep=',',row.names = F)
+
