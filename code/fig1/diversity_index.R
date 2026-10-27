@@ -4,12 +4,6 @@ library(vegan)
 library(ape)
 library(picante)
 
-
-
-OTUs <- read.delim('./data/种水平绝对定量.txt',sep='\t',check.names = F)
-
-groups = read.delim("./data/metadata.txt", sep='\t')
-
 bacteria = OTUs[OTUs$Kingdom == 'Bacteria',]
 fungi = OTUs[OTUs$Kingdom == 'Eukaryota',]
 archaea = OTUs[OTUs$Kingdom == 'Archaea',]
