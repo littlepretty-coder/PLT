@@ -10,15 +10,12 @@ library(rstatix)
 groups = read.delim("./data/metadata.txt", sep='\t')
 groups = groups[(groups$Group == 'W/ Infection'),]
 
-
-OTUs <- read.delim('./data/属水平相对定量.txt',sep='\t',check.names = F)
-
 bacteria = OTUs[OTUs$Kingdom == 'Bacteria',]
 fungi = OTUs[OTUs$Kingdom == 'Eukaryota',]
 archaea = OTUs[OTUs$Kingdom == 'Archaea',]
 
 
-# 第一个向量
+
 fungi_absolute <- c("Trichosporon", "Candida", "Saccharomyces", "Meyerozyma", 
                     "Nakaseomyces", "Ramularia", "Neurospora", "Aspergillus", 
                     "Clavispora", "Pyricularia", "Penicillium", "Geosmithia", 
@@ -122,6 +119,5 @@ ggplot(df7, aes(x=group,stratum=variable,
         axis.title.y = element_text(vjust=0.2, size = 24, face = "bold"))+
   labs(  y = "Abusolute abundance")
 
-#ggsave(paste0('./1D/绝对定量relative/bacteria.barplot.未感染组.ab_re.pdf'),width = 8,height = 8)
 
 
