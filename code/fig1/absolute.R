@@ -1,4 +1,4 @@
-options (warn = -1)#test
+options (warn = -1)
 library(reshape2)
 library(ggplot2)
 library(RColorBrewer)
