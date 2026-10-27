@@ -1,14 +1,9 @@
-#test
+
 rm(list=ls())
 library(reshape2)
 library(tidyverse)
 library(ggpubr)
 library(rstatix)
-groups = read.delim("./data/metadata.txt", sep='\t')
-
-
-
-df1<-read.delim('./fig1/1C/archaea.diversity.index.txt',header = T)
 
 mygroup = groups[,c(1,6)]
 colnames(mygroup)<-c('sample','group')
@@ -31,18 +26,7 @@ stat.test$y.position
 mycol<-c("#CFDD97" ,"#A5B55D")
 stat.test$p.adj.signif<-cut(stat.test$p,breaks =c(0,0.001,0.01,0.05,1),
                             labels = c('***','**','*','ns')  )
-#df2$group <- factor(df2$group,levels = c('T0','T1','T2','T3'))
-df2$group <- factor(df2$group,levels = c('移植前','移植后'))
-# df2$group <- factor(df2$group,levels = c('未感染移植前','未感染移植后',
-#                                          '感染移植前','感染移植后'))
-# df2$group <- factor(df2$group,levels = c('W/O Infection_T0','W/O Infection_T1',
-#                                          'W/O Infection_T3',
-#                                         'W/ Infection_T0','W/ Infection_T1',
-#                                         'W/ Infection_T2','W/ Infection_T3'))
-# df2$group <- factor(df2$group,levels = c('before_transplation_None_infected','after_transplation_None_infected',
-#                                          'before_transplation_before/now_infected','after_transplation_before/now_infected',
-#                                          'after_transplation_after_infected'))
-#font_families()
+
 ggviolin(df2, x = "group", y = "new", fill = "group",
          add=c('boxplot'),shape=21,
          add.params = list(width=0.1))+
@@ -62,9 +46,7 @@ ggviolin(df2, x = "group", y = "new", fill = "group",
 
 
  stat.test2<-as.data.frame(apply(stat.test,2,as.character))
-# write.table(stat.test2,paste0('bacteria.',myindex,'.violine.pdf.stat.xls'),row.names = F,sep = '\t',quote = F)
 
-ggsave(paste0('./fig1/1C/a1.pdf'),width = 4,height = 4)
 
 
 #----------------------------------------------------------------------------------------------------------------
