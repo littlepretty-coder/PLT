@@ -5,16 +5,7 @@ library(tidyr)
 library(stringr)
 library(data.table)
 library(ggplot2)
-group = read.delim('./data/metadata.txt',sep='\t')
-group$Timepoint0 <- ifelse(group$Group == "W/ Infection", 
-                           paste0("W_", group$Timepoint), 
-                           ifelse(group$Group == "W/O Infection", 
-                                  paste0("WO_", group$Timepoint), 
-                                  group$Timepoint))
 
-
-
-OTUs <- read.delim('./data/属水平绝对定量.txt',sep='\t',check.names = F)
 bacteria = OTUs[OTUs$Kingdom == 'Bacteria',]
 fungi = OTUs[OTUs$Kingdom == 'Eukaryota',]
 #archaea = OTUs[OTUs$Kingdom == 'Archaea',]
@@ -62,32 +53,8 @@ fun0 = fun0[rownames(fun0)%in%metab$SampleID,]
 bac0 = bac0[rownames(bac0)%in%metab$SampleID,]
 rownames(metab) = metab$SampleID
 metab = metab[,-c(1,ncol(metab))]
-
-tmp = read.delim('./metab/wilcox.txt')
 tmp$fdr = p.adjust(tmp$kw_pvalue)
 tmp = tmp[tmp$fdr < 0.01,]
-names = c(
-  "Acetylcarnitine",
-  "N-methyltryptamine",
-  "Glycerophosphocholine",
-  "Citric acid",
-  "Hydroxyphenyllactic acid",
-  "3,4-DiHydroxyhydrocinnamic acid",
-  "7-Dehydrocholic acid",
-  "5-Hydroxylysine",
-  "γ-Aminobutyric acid",
-  "N-methyl-aspartic acid",
-  "Conjugated linoleic acids",
-  "Dihomo-γ-linolenic acid",
-  "5Z,8Z,11Z,14Z,17Z-Eicosapentaenoic acid",
-  "Diethanolamine",
-  "13-Hydroxy-4Z,7Z,10Z,14E,16Z,19Z-docosahexaenoic acid",
-  "α-Linolenic acid",
-  "Glycolithocholic acid-3-sulfate",
-  "Acetylcholine",
-  "γ-Linolenic acid",
-  "Propionylcarnitine"
-)
 metab = metab[,colnames(metab) %in% names,]
 
 group = merge(metab[,1:2],group[,c(1,10)],by.x = 'row.names',by.y = 'SampleID')
@@ -98,7 +65,6 @@ bac00 = bac0[rownames(bac0)%in%wo0,]
 metab0 = metab[rownames(metab)%in%wo0,]
 cor_matrix <- cor(fun0, metab, method = "spearman")
 
-# 计算每对相关性的p值矩阵
 p_value_matrix <- matrix(NA, nrow = nrow(cor_matrix), ncol = ncol(cor_matrix))
 for (i in 1:nrow(cor_matrix)) {
   for (j in 1:ncol(cor_matrix)) {
@@ -106,14 +72,12 @@ for (i in 1:nrow(cor_matrix)) {
   }
 }
 
-# 显著性标注（设定p值的阈值）
 sig_matrix <- ifelse(p_value_matrix < 0.001, "***",
                      ifelse(p_value_matrix < 0.01, "**",
                             ifelse(p_value_matrix < 0.05, "*", '')))
 
 
 breaks_values <- seq(-0.4, 0.4, length.out = 101)
-# 绘制热图
 pheatmap(cor_matrix,
          color = colorRampPalette(c("#2171B5", "white", "#D94801"))(100),
          main = "Fungi-Metabolites Interaction Heatmap",
