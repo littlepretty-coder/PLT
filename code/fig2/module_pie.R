@@ -1,5 +1,4 @@
-data = read.delim('./data/属水平绝对定量.txt')
-data = data[,-c(1,3)]
+
 tmp = aggregate(data[,2:ncol(data)],by = list(data$Genus),sum)
 tmp = tmp[tmp$Group.1 %in% names,]
 tmp$sum = rowSums(tmp[,2:ncol(tmp)])
@@ -24,13 +23,13 @@ df_with_percentage <- tmp0 %>%
     Total = sum(sum),
     Percentage = (sum / Total) * 100
   ) %>%
-  arrange(Module, desc(sum)) %>%  # 按 Module 分组后按丰度降序排列
-  mutate(Rank = row_number())    # 添加排名
+  arrange(Module, desc(sum)) %>% 
+  mutate(Rank = row_number())
 
-# 2. 合并排名以外的物种为 "其他"
+
 df_top3 <- df_with_percentage %>%
-  mutate(Group.1 = ifelse(Rank > 3, "Other", Group.1)) %>% # 合并“其他”物种
-  group_by(Module, Group.1) %>% # 重新分组
+  mutate(Group.1 = ifelse(Rank > 3, "Other", Group.1)) %>% 
+  group_by(Module, Group.1) %>%
   summarise(
     sum = sum(sum),
     Percentage = sum(Percentage),
@@ -43,15 +42,15 @@ color = rbind(colorb,colorf)
 color
 
 df_top3 <- df_top3 %>%
-  left_join(color, by = c("Group.1" = "common_genera")) # 使用物种名称匹配颜色
+  left_join(color, by = c("Group.1" = "common_genera"))
 df_top3[df_top3[, 2] == "Other", 5] <- "gray94"
-# 4. 绘制饼图并使用对应颜色
+
 ggplot(df_top3, aes(x = "", y = Percentage, fill = Group.1)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar(theta = "y") +
   labs(title = "Species Percentage (Top 3 + Other) in Each Module",
        x = NULL, y = NULL, fill = "Species") +
-  scale_fill_manual(values = setNames(df_top3$color, df_top3$Group.1)) + # 设置自定义颜色
+  scale_fill_manual(values = setNames(df_top3$color, df_top3$Group.1)) +
   theme_void() +
   theme(legend.position = "right") +
   facet_wrap(~ Module)
