@@ -1,7 +1,6 @@
-OTUs <- read.delim('./data/属水平绝对定量.txt',sep='\t',check.names = F)
+
 bacteria = OTUs[OTUs$Kingdom == 'Bacteria',]
 fungi = OTUs[OTUs$Kingdom == 'Eukaryota',]
-#archaea = OTUs[OTUs$Kingdom == 'Archaea',]
 bac  = bacteria
 bac = bac[,-c(1,3)]
 bac = aggregate(. ~ Genus, data = bac, FUN = sum)
@@ -97,12 +96,12 @@ group = group[,c(1,10)]
 
 a_long <- melt(tmpp, id.vars = "Group.1", variable.name = "SampleID", value.name = "Abundance")
 b = group
-# 2. 将样本和分组信息合并
+
 a_long <- a_long %>%
   left_join(b, by = "SampleID")
 colnames(a_long)[4] = 'Group'
 a_long = as.data.frame(a_long)
-# 3. 按分组和物种汇总丰度
+
 library(data.table)
 grouped_data <- a_long %>%
   group_by(Group, Group.1) %>%
@@ -113,23 +112,22 @@ custom_colors <- c(
   "bacteria_1" = "#A51C36", "bacteria_2" = "#7ABBDB",
   "bacteria_3" = "#84BA42", "bacteria_4" = "#682487"
 )
-# 4. 计算每个分组内物种的百分比
+
 grouped_data = grouped_data[!(grouped_data$Group %in% c('WO_','W_')),]
 grouped_data <- grouped_data %>%
   group_by(Group) %>%
   mutate(Percentage = TotalAbundance / sum(TotalAbundance) * 100)
 
 ggplot(grouped_data, aes(x = Group, y = Percentage, fill = Group.1)) +
-  geom_bar(stat = "identity", position = "stack") + # 堆叠柱状图
+  geom_bar(stat = "identity", position = "stack") + 
   labs(x = "Group", y = "Percentage (%)", fill = "Species", 
        title = "Percentage of Species in Each Group") +
-  scale_y_continuous(labels = scales::percent_format(scale = 1)) + # 显示为百分比格式
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) + 
   theme_minimal() +
   scale_fill_manual(values = custom_colors) +          
   theme(
-    axis.text = element_text(size = 10),       # 坐标轴文字大小
-    axis.title = element_text(size = 12),      # 坐标轴标题大小
-    legend.text = element_text(size = 10),     # 图例文字大小
-    legend.title = element_text(size = 12)     # 图例标题大小
+    axis.text = element_text(size = 10),      
+    axis.title = element_text(size = 12),     
+    legend.text = element_text(size = 10),    
+    legend.title = element_text(size = 12)     
   )
-write.table(grouped_data,'./figure/suppdata/fig2/module_fungal_abundance_percentage.csv',sep=',',row.names = F)
