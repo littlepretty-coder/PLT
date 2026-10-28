@@ -17,7 +17,7 @@ set.seed(123)
 chisq_all <- chisq.test(tab_all, simulate.p.value = TRUE, B = 20000)
 chisq_all
 
-prop_tab_all <- prop.table(tab_all, margin = 1)  # 每个Timepoint内部比例
+prop_tab_all <- prop.table(tab_all, margin = 1) 
 round(prop_tab_all, 3)
 
 library(ggplot2)
