@@ -1,49 +1,26 @@
-# 加载必要的包
+
 if (!require("vegan")) install.packages("vegan")
 library(vegan)
 library(readxl)
-# 示例代谢物丰度数据 (矩阵形式)
-# metabolite_data <- matrix(runif(100, 1, 10), nrow = 10, ncol = 10)
-# rownames(metabolite_data) <- paste0("Sample", 1:10)
-# colnames(metabolite_data) <- paste0("Metabolite", 1:10)
-metab = read_excel('./metab/all.xlsx')
-metab = metab[,-c(2:5)]
-metab = as.data.frame(t(metab))
-colnames(metab) = metab[1,]
-metab = metab[-1,]
-# 示例菌群丰度数据 (矩阵形式)
-# microbe_data <- matrix(runif(100, 1, 10), nrow = 10, ncol = 10)
-# rownames(microbe_data) <- paste0("Sample", 1:10)
-# colnames(microbe_data) <- paste0("Microbe", 1:10)
-merged_data = read.delim('./data/属水平绝对定量.txt',check.names = F)
-merged_data = merged_data[,-c(2,3)]
-merged_data = as.data.frame(t(merged_data))
-colnames(merged_data) = merged_data[1,]
-merged_data = merged_data[-1,]
-merged_data = merged_data[rownames(merged_data) %in% rownames(metab),]
-# 确保两个数据集有相同的样本
-# 代谢物丰度和菌群丰度数据的样本名称必须一致
 metabolite_data = metab
 microbe_data = merged_data
-common_samples <- intersect(rownames(metabolite_data), rownames(microbe_data))  # 找到共同的样本
+common_samples <- intersect(rownames(metabolite_data), rownames(microbe_data)) 
 metabolite_data <- metabolite_data[common_samples, ]
 microbe_data <- microbe_data[common_samples, ]
-all(rownames(metabolite_data) == rownames(microbe_data))  # 必须返回 TRUE
-
-# 对代谢物丰度数据进行PCA
+all(rownames(metabolite_data) == rownames(microbe_data))
 
 metabolite_data[] <- lapply(metabolite_data, function(x) {
   if (is.character(x)) {
-    as.numeric(x) # 将字符型数值转为数值型
+    as.numeric(x) 
   } else {
-    x # 保留其他列原样
+    x 
   }
 })
 microbe_data[] <- lapply(microbe_data, function(x) {
   if (is.character(x)) {
-    as.numeric(x) # 将字符型数值转为数值型
+    as.numeric(x)
   } else {
-    x # 保留其他列原样
+    x 
   }
 })
 #---------------------------------------------------------------------------------
@@ -73,37 +50,30 @@ microbe_data <- microbe_data[, !(apply(microbe_data, 2, function(x) var(x) == 0)
 # metabolite_data = scale(metabolite_data)
 # microbe_data = scale(microbe_data)
 metabolite_pca <- prcomp(metabolite_data,center = T,scale=T)
-metabolite_scores <- metabolite_pca$x  # 提取PCA得分
+metabolite_scores <- metabolite_pca$x  
 
-# 对菌群丰度数据进行PCA
+
 microbe_pca <- prcomp(microbe_data,center = T,scale=T)
-microbe_scores <- microbe_pca$x  # 提取PCA得分
+microbe_scores <- microbe_pca$x 
 
-# 只保留前两个主成分 (确保两个矩阵的维度一致)
 metabolite_pca_reduced <- metabolite_scores[, 1:2]
 microbe_pca_reduced <- microbe_scores[, 1:2]
-# 执行 Procrustes 分析
+
 pro <- procrustes(metabolite_pca_reduced, microbe_pca_reduced)
-write.table(microbe_pca_reduced,'./figure/suppdata/fig4/Discovery_microbe_pca.csv',sep=',',row.names = T)
-# 查看结果
-summary(pro)  # 总结分析结果
-# 绘制 Procrustes 分析结果
+
+summary(pro)  
 #------------------------------------------
-x_coords <- pro$X[, 1]  # 提取 X 坐标
-y_coords <- pro$X[, 2]  # 提取 Y 坐标
+x_coords <- pro$X[, 1] 
+y_coords <- pro$X[, 2] 
 
-# 设置异常值的范围（这里根据图中估计）
-outlier_indices <- which(x_coords >10 | y_coords > 20)  # 定义异常条件
 
-# 查看异常值的索引
+outlier_indices <- which(x_coords >10 | y_coords > 20)  
 print(outlier_indices)
-# 查看异常样本名称
 print(rownames(pro$X)[outlier_indices])
 
 metabolite_data_clean <- metabolite_data[-outlier_indices, ]
 microbe_data_clean <- microbe_data[-outlier_indices, ]
 
-# 删除 Procrustes 分析中对应的异常点
 pro_clean <- pro
 pro_clean$X <- pro$X[-outlier_indices, ]
 pro_clean$Yrot <- pro$Yrot[-outlier_indices, ]
@@ -113,11 +83,9 @@ plot(pro_clean$X[, 1], pro_clean$X[, 2],
      xlab = "PC 1", ylab = "PC 2",
      pch = 24, col = rgb(0.6118, 0.6902, 0.7647), bg = rgb(0.6118, 0.6902, 0.7647,0.2), cex = 3, lwd = 2)
 
-# 绘制另一组点
 points(pro_clean$Yrot[, 1], pro_clean$Yrot[, 2], 
        pch = 23, col = rgb(0.956, 0.874, 0.827),cex = 3, lwd = 2)
 
-# 绘制连线
 for (i in 1:nrow(pro_clean$X)) {
   lines(c(pro_clean$X[i, 1], pro_clean$Yrot[i, 1]), 
         c(pro_clean$X[i, 2], pro_clean$Yrot[i, 2]), 
@@ -125,10 +93,9 @@ for (i in 1:nrow(pro_clean$X)) {
 }
 
 text(0.065, -0.09, expression(italic("P value = 0.006")), 
-     cex = 1.2, col = "black", pos = 4) # 计算 Procrustes 相关性
+     cex = 1.2, col = "black", pos = 4) 
 pro_test <- protest(metabolite_pca_reduced, microbe_pca_reduced)
 
-# 查看相关性结果
 summary(pro_test)
 print(pro_test$signif)
 mantel_result <- mantel(vegdist(metabolite_data), vegdist(microbe_data), method = "spearman")
