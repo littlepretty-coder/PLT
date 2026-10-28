@@ -1,5 +1,4 @@
 library(data.table)
-metab = fread('./metab/wilcox.txt')
 metab$fc = log2(metab$median_w/metab$median_wo)
 metab = metab[order(metab$fc),]
 metab0 = metab[c(1:10,(nrow(metab)-9):nrow(metab)),]
@@ -12,7 +11,7 @@ metab00$stars <- ifelse(metab00$fdr < 0.001, "***",
 library(ggplot2)
 ggplot(metab00, aes(x = reorder(key,fc))) +
   geom_bar(aes(y=fc,fill=key),stat = "identity", fill = "steelblue") +
-  geom_text(aes(y = fc, label = stars), size = 10) +  # 添加星号
+  geom_text(aes(y = fc, label = stars), size = 10) + 
   theme_minimal() +
   coord_flip()+
   labs(title = "Fold Change with Significance",
